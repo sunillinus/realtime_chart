@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+var debug = require('debug')('nodeapp');
+var app = require('../app');
+var socket = require('socket.io');
+
+console.log('www');
+app.set('port', process.env.PORT || 80);
+
+
+var server = app.listen(app.get('port'), function() {
+  debug('Express server listening on port ' + server.address().port);
+});
+
+var io = socket.listen(server);
+io.sockets.on('connection', function(client) {
+  console.log('Client connected...');
+  setInterval(function() {
+    data = { value: Math.floor(Math.random()*100), created_at: Date.now() }
+    app.db.collection('data').insert(data, function(err, result) {});
+    client.emit('messages', data);
+  }, 5000);
+});
